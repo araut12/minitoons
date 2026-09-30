@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex">
+  <title>Connected · MiniToons</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="wrap">
+    <header><a class="logo" href="./"><span>Mini</span><span>Toons</span></a></header>
+    <article class="doc">
+      <h1 id="h">Almost done</h1>
+      <p id="msg">Copy this whole page address and paste it back to the MiniToons Publisher sign-in.</p>
+      <p><code id="url"></code></p>
+      <p class="muted">Nothing is stored on this page. The code in the address can only be used once, by our own tool.</p>
+    </article>
+  </div>
+  <script>
+    const q = new URLSearchParams(location.search);
+    document.getElementById('url').textContent = location.href;
+    if (q.get('error')) {
+      document.getElementById('h').textContent = 'Sign-in was cancelled';
+      document.getElementById('msg').textContent = q.get('error_description') || q.get('error');
+    }
+  </script>
+</body>
+</html>
