@@ -4,25 +4,36 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="robots" content="noindex">
-  <title>Connected · MiniToons</title>
+  <title>Connecting · MiniToons</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
   <div class="wrap">
     <header><a class="logo" href="./"><span>Mini</span><span>Toons</span></a></header>
     <article class="doc">
-      <h1 id="h">Almost done</h1>
-      <p id="msg">Copy this whole page address and paste it back to the MiniToons Publisher sign-in.</p>
-      <p><code id="url"></code></p>
-      <p class="muted">Nothing is stored on this page. The code in the address can only be used once, by our own tool.</p>
+      <h1 id="h">Connecting your TikTok account…</h1>
+      <p id="msg">One moment.</p>
+      <p><a class="btn" id="back" href="publisher.html" style="display:none">Back to Publisher</a></p>
+      <p class="muted">The code in this address can be used only once, by the MiniToons Publisher.</p>
     </article>
   </div>
   <script>
     const q = new URLSearchParams(location.search);
-    document.getElementById('url').textContent = location.href;
+    const h = document.getElementById('h'), msg = document.getElementById('msg'), back = document.getElementById('back');
+    const key = sessionStorage.getItem('mt-key');
+    const done = (title, text) => { h.textContent = title; msg.textContent = text; back.style.display = 'inline-block'; };
     if (q.get('error')) {
-      document.getElementById('h').textContent = 'Sign-in was cancelled';
-      document.getElementById('msg').textContent = q.get('error_description') || q.get('error');
+      done('Sign-in was cancelled', q.get('error_description') || q.get('error'));
+    } else if (!key) {
+      done('Almost done', 'Open the Publisher in this browser tab first, then connect again. (Or paste this page address into tiktok.py login-finish.)');
+    } else {
+      fetch('http://127.0.0.1:7777/api/tiktok/finish', {
+        method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Publisher-Key': key },
+        body: JSON.stringify({ address: location.href }),
+      }).then((r) => r.json()).then((j) => {
+        if (j.ok) { h.textContent = `Connected as ${j.nickname || 'your account'} ✅`; msg.textContent = 'Taking you back…'; setTimeout(() => (location.href = 'publisher.html'), 1200); }
+        else done('Could not connect', j.error || 'Unknown error');
+      }).catch(() => done('Could not reach the studio computer', 'Make sure it is on and that this page may access your local network, then connect again.'));
     }
   </script>
 </body>
